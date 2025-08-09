@@ -14,7 +14,7 @@
 
 
 ### Project Description
-A Flask-based API that takes any WiFi password and returns a witty, inappropriate roast under 60 characters to make users question their password choices.
+A Flask-based API that takes any WiFi password and returns a witty, inappropriate roast under 150 characters to make users question their password choices.
 
 ### The Problem (that doesn't exist)
 People think their WiFi passwords are secure and clever—spoiler: they’re not. But who cares? Let’s roast them anyway.
@@ -47,50 +47,31 @@ python app.py
 For Software:
 
 # Screenshots (Add at least 3)
-![Screenshot1](Add screenshot 1 here with proper name)
-*Add caption explaining what this shows*
+Screenshot 1:
+![WhatsApp Image 2025-08-09 at 17 08 05_e4a12083](https://github.com/user-attachments/assets/e4555140-004f-4530-992d-05350a193e46)
 
-![Screenshot2](Add screenshot 2 here with proper name)
-*Add caption explaining what this shows*
 
-![Screenshot3](Add screenshot 3 here with proper name)
-*Add caption explaining what this shows*
+Screenshot 2:
+<img width="1470" height="956" alt="Screenshot 2025-08-09 at 4 45 27 PM" src="https://github.com/user-attachments/assets/216c9727-fd0d-462c-9682-5aed2d218bbe" />
 
-# Diagrams
-![Workflow](Add your workflow/architecture diagram here)
-*Add caption explaining your workflow*
 
-For Hardware:
+Screenshot 3:
+<img width="1470" height="956" alt="Screenshot 2025-08-09 at 4 45 53 PM" src="https://github.com/user-attachments/assets/b095a5ee-3e4d-459f-8b49-e8931dc5b4e2" />
 
-# Schematic & Circuit
-![Circuit](Add your circuit diagram here)
-*Add caption explaining connections*
 
-![Schematic](Add your schematic diagram here)
-*Add caption explaining the schematic*
 
-# Build Photos
-![Components](Add photo of your components here)
-*List out all components shown*
+Workflow: React frontend → Flask API → Gemini model → Roast generated → Displayed + spoken aloud.
 
-![Build](Add photos of build process here)
-*Explain the build steps*
 
-![Final](Add photo of final product here)
-*Explain the final build*
 
-### Project Demo
-# Video
-[Add your demo video link here]
-*Explain what the video demonstrates*
 
-# Additional Demos
-[Add any extra demo materials/links]
 
-## Team Contributions
-- [Name 1]: [Specific contributions]
-- [Name 2]: [Specific contributions]
-- [Name 3]: [Specific contributions]
+Team Contributions:
+
+
+Anjana A S: Backend API development, Gemini API integration, prompt design.
+
+Kajal K: React frontend development, UI/UX design, speech synthesis integration.
 
 ---
 Made with ❤️ at TinkerHub Useless Projects 
