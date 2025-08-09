@@ -3,7 +3,7 @@ from flask_cors import CORS
 import google.generativeai as genai
 import os
 
-app = Flask(_name_)
+app = Flask(__name__)
 CORS(app, resources={r"/roast": {"origins": ["http://localhost:3000", "http://localhost:3001"]}})
 
 # Configure the Gemini API
@@ -56,6 +56,6 @@ Roast:"""
 def health_check():
     return jsonify({"status": "healthy"})
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     print("Starting server on http://localhost:5001")
     app.run(host="0.0.0.0", port=5001, debug=True)
