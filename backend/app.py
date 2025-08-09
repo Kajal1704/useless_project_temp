@@ -3,8 +3,8 @@ from flask_cors import CORS
 import google.generativeai as genai
 import os
 
-app = Flask(__name__)
-CORS(app, resources={r"/roast": {"origins": "http://localhost:3000"}})
+app = Flask(_name_)
+CORS(app, resources={r"/roast": {"origins": ["http://localhost:3000", "http://localhost:3001"]}})
 
 # Configure the Gemini API
 # Set your API key as an environment variable or replace with your actual key
@@ -24,10 +24,12 @@ def roast():
         if not password:
             return jsonify({"error": "Password field is required"}), 400
         
-        prompt = f"""You are a sharp-witted comedian specializing in roasting WiFi passwords. 
-Create a funny, clever,easyily understandable with easy english and highly inappropriate comment that makes the person seriously question their decision to even type that password.  
-The roast must be directly related to the given WiFi password.  
-Keep the entire roast under 150 characters.  
+        prompt = f"""You are a quick-witted comedian who specializes in roasting terrible WiFi passwords.  
+Make the roast clever, funny, and easy to understand, focusing mostly on mocking how bad or silly the password itself is.  
+You can lightly roast the person, but keep it playful, not mean-spirited.  
+Jokes can be about how easy it is to hack, how weird it looks, or how it sounds like a failed attempt at creating a new language.  
+Never repeat the same roast, even for the same password.  
+Keep it under 150 characters.  
 Output only the roast, no explanations or extra text.
 
 Password: "{password}"
@@ -54,5 +56,6 @@ Roast:"""
 def health_check():
     return jsonify({"status": "healthy"})
 
-if __name__ == "__main__":
-    app.run(port=5000, debug=True)
+if _name_ == "_main_":
+    print("Starting server on http://localhost:5001")
+    app.run(host="0.0.0.0", port=5001, debug=True)
