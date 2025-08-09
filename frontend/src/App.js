@@ -34,14 +34,25 @@ function WiFiPasswordSetter() {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
-          "Accept": "application/json"
+          "Accept": "application/json",
+          "Access-Control-Allow-Origin": "*"
         },
         body: JSON.stringify({ password }),
+        mode: 'cors',
+        credentials: 'omit'
       });
 
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || "Validation service unavailable");
+        let errorMessage = `Server returned ${res.status}: ${res.statusText}`;
+        try {
+          const errorData = await res.json();
+          if (errorData.error) {
+            errorMessage = errorData.error;
+          }
+        } catch (e) {
+          // If JSON parsing fails, use the default error message
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await res.json();
@@ -80,16 +91,47 @@ function WiFiPasswordSetter() {
     } catch (err) {
       console.error("Validation error:", err);
       
-      if (err.message.includes('Failed to fetch') || err.message.includes('fetch')) {
-        setValidationMessage("Unable to connect to password validation service. Please check your connection and try again.");
-      } else if (err.message.includes('NetworkError') || err.message.includes('CORS')) {
-        setValidationMessage("Network error: Unable to reach validation service. The server might be starting up, please wait a moment and try again.");
+      if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+        setValidationMessage("Unable to connect to password validation service. The server might be sleeping - please wait 30 seconds and try again.");
+      } else if (err.message.includes('CORS')) {
+        setValidationMessage("Network error: Cross-origin request blocked. Please try again.");
+      } else if (err.message.includes('503') || err.message.includes('502')) {
+        setValidationMessage("Service temporarily unavailable. The server is starting up - please wait 30-60 seconds and try again.");
       } else {
         setValidationMessage(err.message || "Password validation service is temporarily unavailable. Please try again later.");
       }
       setMessageType("error");
     } finally {
       setValidating(false);
+    }
+  };
+
+  // Test backend connection
+  const testConnection = async () => {
+    try {
+      setValidationMessage("Testing connection to backend...");
+      setMessageType("info");
+      
+      const res = await fetch("https://useless-project-temp-bjll.onrender.com/health", {
+        method: "GET",
+        headers: { 
+          "Accept": "application/json"
+        },
+        mode: 'cors',
+        credentials: 'omit'
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setValidationMessage("✅ Backend connection successful! " + (data.message || ""));
+        setMessageType("info");
+      } else {
+        setValidationMessage(`❌ Backend responded with ${res.status}: ${res.statusText}`);
+        setMessageType("error");
+      }
+    } catch (err) {
+      setValidationMessage(`❌ Connection failed: ${err.message}`);
+      setMessageType("error");
     }
   };
 
@@ -218,6 +260,26 @@ function WiFiPasswordSetter() {
               Security: WPA2-Personal
             </div>
           </div>
+        </div>
+
+        {/* Test Connection Button */}
+        <div style={{ marginBottom: "16px", textAlign: "center" }}>
+          <button
+            onClick={testConnection}
+            style={{
+              padding: "8px 16px",
+              fontSize: "12px",
+              fontWeight: "500",
+              border: "1px solid #d1d5db",
+              borderRadius: "6px",
+              backgroundColor: "#f9fafb",
+              color: "#374151",
+              cursor: "pointer",
+              transition: "all 0.2s"
+            }}
+          >
+            🔧 Test Backend Connection
+          </button>
         </div>
 
         {/* Password Input */}
