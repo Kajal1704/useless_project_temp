@@ -4,7 +4,18 @@ import google.generativeai as genai
 import os
 
 app = Flask(__name__)
-CORS(app, resources={r"/roast": {"origins": ["http://localhost:3000", "http://localhost:3001", "http://localhost:3002"]}})
+
+# Fix CORS to allow your Vercel domain
+CORS(app, resources={
+    r"/roast": {
+        "origins": [
+            "https://useless-project-temp-livid.vercel.app",
+            "http://localhost:3000", 
+            "http://localhost:3001", 
+            "http://localhost:3002"
+        ]
+    }
+})
 
 # Configure the Gemini API
 # Set your API key as an environment variable or replace with your actual key
@@ -51,9 +62,17 @@ Roast:"""
     
     return jsonify({"reply": roast_reply})
 
+@app.route("/roast", methods=["GET"])
+def roast_get():
+    return jsonify({"message": "This endpoint expects a POST request with password data"}), 200
+
 @app.route("/health", methods=["GET"])
 def health_check():
     return jsonify({"status": "healthy"})
+
+@app.route("/", methods=["GET"])
+def root():
+    return jsonify({"message": "WiFi Password Roasting API is running!"})
 
 if __name__ == "__main__":
     print("Starting server on http://localhost:5000")
