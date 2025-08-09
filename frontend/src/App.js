@@ -1,155 +1,342 @@
 import React, { useState } from "react";
 
-function PasswordInput() {
+function WiFiPasswordSetter() {
   const [showPassword, setShowPassword] = useState(false);
-  const [value, setValue] = useState("");
-  const [roast, setRoast] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [password, setPassword] = useState("");
+  const [validationMessage, setValidationMessage] = useState("");
+  const [validating, setValidating] = useState(false);
+  const [messageType, setMessageType] = useState(""); // "warning", "error", "info"
 
-  const fetchRoast = async () => {
-    if (!value) {
-      alert("Please type something to roast 😏");
+  const validatePassword = async () => {
+    if (!password) {
+      setValidationMessage("Password field cannot be empty");
+      setMessageType("error");
       return;
     }
+
     try {
-      setLoading(true);
-      // If you added "proxy" in package.json, use "/roast"
-      // Otherwise, replace with "http://localhost:5000/roast"
-      const res = await fetch("/roast", {
+      setValidating(true);
+      setValidationMessage("Validating password security...");
+      setMessageType("info");
+
+      // Simulate network validation delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // Call backend for "validation" (actually roasting)
+      const res = await fetch("http://localhost:5001/roast", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password: value }),
+        body: JSON.stringify({ password }),
       });
 
       if (!res.ok) {
-        throw new Error(`Server error: ${res.statusText}`);
+        throw new Error("Validation service unavailable");
       }
 
       const data = await res.json();
-      setRoast(data.reply);
+      setValidationMessage(data.reply);
+      setMessageType("warning");
 
-      // Speak the roast aloud
-      const synth = window.speechSynthesis;
-      const utter = new SpeechSynthesisUtterance(data.reply);
-      synth.speak(utter);
+      // Text-to-speech with more natural, sarcastic voice
+      if ('speechSynthesis' in window) {
+        const synth = window.speechSynthesis;
+        const utterance = new SpeechSynthesisUtterance(data.reply);
+        
+        // Configure for more natural, sarcastic delivery
+        utterance.rate = 0.85;
+        utterance.pitch = 0.9;
+        utterance.volume = 0.8;
+        
+        // Try to find a more natural voice
+        const voices = synth.getVoices();
+        const preferredVoice = voices.find(voice => 
+          voice.name.includes('Google') || 
+          voice.name.includes('Microsoft') ||
+          voice.lang.startsWith('en')
+        );
+        if (preferredVoice) {
+          utterance.voice = preferredVoice;
+        }
+        
+        synth.speak(utterance);
+      }
 
     } catch (err) {
       console.error(err);
-      setRoast("Oops! Can't roast right now 😬");
+      if (err.message.includes('Failed to fetch')) {
+        setValidationMessage("Unable to connect to password validation service. Please ensure the backend server is running on port 5000.");
+      } else {
+        setValidationMessage("Password validation service is temporarily unavailable. Please try again later.");
+      }
+      setMessageType("error");
     } finally {
-      setLoading(false);
+      setValidating(false);
+    }
+  };
+
+  const getMessageIcon = () => {
+    switch (messageType) {
+      case "warning":
+        return "⚠️";
+      case "error":
+        return "❌";
+      case "info":
+        return "ℹ️";
+      default:
+        return "⚠️";
+    }
+  };
+
+  const getMessageStyle = () => {
+    switch (messageType) {
+      case "warning":
+        return {
+          backgroundColor: "#fef3c7",
+          borderColor: "#f59e0b",
+          color: "#92400e"
+        };
+      case "error":
+        return {
+          backgroundColor: "#fee2e2",
+          borderColor: "#ef4444",
+          color: "#991b1b"
+        };
+      case "info":
+        return {
+          backgroundColor: "#dbeafe",
+          borderColor: "#3b82f6",
+          color: "#1e40af"
+        };
+      default:
+        return {
+          backgroundColor: "#fef3c7",
+          borderColor: "#f59e0b",
+          color: "#92400e"
+        };
     }
   };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "radial-gradient(circle at 80% 20%, #fff176 10%, #f06292 76%, #64b5f6 100%)",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        fontFamily: "'Comic Neue', Comic Sans MS, cursive, sans-serif",
-      }}
-    >
-      <div
-        style={{
-          background: "rgba(255,255,255,0.85)",
-          borderRadius: "20px",
-          boxShadow: "0 8px 32px rgba(160, 110, 220, 0.2)",
-          padding: "40px 30px",
+    <div style={{
+      minHeight: "100vh",
+      backgroundColor: "#f8fafc",
+      backgroundImage: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+      padding: "20px"
+    }}>
+      <div style={{
+        backgroundColor: "white",
+        borderRadius: "12px",
+        boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+        border: "1px solid #e2e8f0",
+        width: "100%",
+        maxWidth: "480px",
+        padding: "32px"
+      }}>
+        {/* Header */}
+        <div style={{
           display: "flex",
-          flexDirection: "column",
           alignItems: "center",
-          border: "3px dashed #f06292",
-        }}
-      >
-        <h2
-          style={{
-            margin: "0 0 24px",
-            color: "#5e35b1",
-            fontWeight: 700,
-            fontSize: 26,
-          }}
-        >
-          🔒 Roast Portal of Doom! 😂
-        </h2>
+          marginBottom: "24px",
+          paddingBottom: "16px",
+          borderBottom: "1px solid #e2e8f0"
+        }}>
+          <div style={{
+            backgroundColor: "#3b82f6",
+            borderRadius: "8px",
+            padding: "8px",
+            marginRight: "12px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }}>
+            <span style={{ color: "white", fontSize: "16px" }}>📶</span>
+          </div>
+          <div>
+            <h1 style={{
+              fontSize: "18px",
+              fontWeight: "600",
+              color: "#1e293b",
+              margin: "0",
+              lineHeight: "1.2"
+            }}>
+              WiFi Network Configuration
+            </h1>
+            <p style={{
+              fontSize: "14px",
+              color: "#64748b",
+              margin: "4px 0 0 0"
+            }}>
+              Set up your wireless network password
+            </p>
+          </div>
+        </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        {/* Network Info */}
+        <div style={{
+          backgroundColor: "#f1f5f9",
+          borderRadius: "8px",
+          padding: "12px 16px",
+          marginBottom: "24px",
+          display: "flex",
+          alignItems: "center"
+        }}>
+          <span style={{ marginRight: "8px", fontSize: "14px" }}>⚙️</span>
+          <div>
+            <div style={{ fontSize: "14px", fontWeight: "500", color: "#374151" }}>
+              Network: HomeNetwork_5GHz
+            </div>
+            <div style={{ fontSize: "12px", color: "#6b7280" }}>
+              Security: WPA2-Personal
+            </div>
+          </div>
+        </div>
+
+        {/* Password Input */}
+        <div style={{ marginBottom: "20px" }}>
+          <label style={{
+            display: "block",
+            fontSize: "14px",
+            fontWeight: "500",
+            color: "#374151",
+            marginBottom: "8px"
+          }}>
+            Network Password *
+          </label>
           <div style={{ position: "relative" }}>
             <input
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               type={showPassword ? "text" : "password"}
-              placeholder={showPassword ? "😲 Password exposed!" : "🤫 Your secret..."}
+              placeholder="Enter your network password"
               style={{
-                width: "260px",
-                padding: "0 40px 0 16px",
-                height: "45px",
-                fontSize: "18px",
-                borderRadius: "25px",
-                border: "2px solid #fff176",
+                width: "100%",
+                padding: "12px 40px 12px 16px",
+                fontSize: "14px",
+                border: "1px solid #d1d5db",
+                borderRadius: "8px",
                 outline: "none",
-                background: "linear-gradient(90deg, #f3e5f5, #fffde7)",
+                backgroundColor: "white",
+                transition: "border-color 0.2s",
+                boxSizing: "border-box"
               }}
+              onFocus={(e) => e.target.style.borderColor = "#3b82f6"}
+              onBlur={(e) => e.target.style.borderColor = "#d1d5db"}
             />
-            <span
+            <button
               onClick={() => setShowPassword(!showPassword)}
               style={{
                 position: "absolute",
-                right: "10px",
+                right: "12px",
                 top: "50%",
                 transform: "translateY(-50%)",
+                background: "none",
+                border: "none",
                 cursor: "pointer",
-                fontSize: "22px",
-                userSelect: "none",
+                color: "#6b7280",
+                padding: "4px"
               }}
               aria-label={showPassword ? "Hide password" : "Show password"}
-              role="button"
-              tabIndex={0}
-              onKeyPress={(e) => {
-                if (e.key === "Enter" || e.key === " ") setShowPassword(!showPassword);
-              }}
             >
               {showPassword ? "🙈" : "👁️"}
-            </span>
+            </button>
           </div>
+          <p style={{
+            fontSize: "12px",
+            color: "#6b7280",
+            marginTop: "6px",
+            margin: "6px 0 0 0"
+          }}>
+            Password must be 8-63 characters long
+          </p>
+        </div>
 
+        {/* Validation Message */}
+        {validationMessage && (
+          <div style={{
+            ...getMessageStyle(),
+            border: "1px solid",
+            borderRadius: "8px",
+            padding: "12px 16px",
+            marginBottom: "20px",
+            display: "flex",
+            alignItems: "flex-start",
+            fontSize: "14px",
+            lineHeight: "1.5"
+          }}>
+            <div style={{ marginRight: "8px", marginTop: "2px", flexShrink: 0 }}>
+              {getMessageIcon()}
+            </div>
+            <div>{validationMessage}</div>
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        <div style={{
+          display: "flex",
+          gap: "12px",
+          justifyContent: "flex-end"
+        }}>
           <button
-            onClick={fetchRoast}
-            disabled={loading}
+            onClick={() => {
+              setPassword("");
+              setValidationMessage("");
+              setMessageType("");
+            }}
             style={{
-              background: "#ff5722",
-              color: "#fff",
-              border: "none",
-              borderRadius: "25px",
-              padding: "10px 18px",
-              fontSize: "16px",
+              padding: "10px 20px",
+              fontSize: "14px",
+              fontWeight: "500",
+              border: "1px solid #d1d5db",
+              borderRadius: "8px",
+              backgroundColor: "white",
+              color: "#374151",
               cursor: "pointer",
-              fontWeight: "bold",
-              boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+              transition: "all 0.2s"
             }}
           >
-            {loading ? "🔥..." : "Enter"}
+            Cancel
+          </button>
+          <button
+            onClick={validatePassword}
+            disabled={validating || !password}
+            style={{
+              padding: "10px 20px",
+              fontSize: "14px",
+              fontWeight: "500",
+              border: "none",
+              borderRadius: "8px",
+              backgroundColor: validating || !password ? "#9ca3af" : "#3b82f6",
+              color: "white",
+              cursor: validating || !password ? "not-allowed" : "pointer",
+              transition: "all 0.2s",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px"
+            }}
+          >
+            <span style={{ marginRight: "6px" }}>🛡️</span>
+            {validating ? "Validating..." : "Apply Settings"}
           </button>
         </div>
 
-        {roast && (
-          <p
-            style={{
-              marginTop: "20px",
-              color: "#d84315",
-              fontWeight: "bold",
-              fontSize: "20px",
-              textAlign: "center",
-            }}
-          >
-            {roast}
-          </p>
-        )}
+        {/* Footer */}
+        <div style={{
+          marginTop: "24px",
+          paddingTop: "16px",
+          borderTop: "1px solid #e2e8f0",
+          fontSize: "12px",
+          color: "#6b7280",
+          textAlign: "center"
+        }}>
+          Changes will be applied immediately after validation
+        </div>
       </div>
     </div>
   );
 }
 
-export default PasswordInput;
+export default WiFiPasswordSetter;
