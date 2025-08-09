@@ -7,19 +7,27 @@ app = Flask(__name__)
 
 # Fix CORS to allow your Vercel domain
 CORS(app, resources={
-    r"/roast": {
+    r"/*": {
         "origins": [
             "https://useless-project-temp-livid.vercel.app",
+            "https://useless-project-temp-n7rc3vk7m-kajal1704s-projects.vercel.app",
             "http://localhost:3000", 
             "http://localhost:3001", 
             "http://localhost:3002"
-        ]
+        ],
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Accept"]
     }
 })
 
-# Configure the Gemini API
-# Set your API key as an environment variable or replace with your actual key
-genai.configure(api_key="AIzaSyD3oHw59DwXxNrqou_c0WgSM_glC6BKpRc")
+# Configure the Gemini API - USE ENVIRONMENT VARIABLE
+api_key = os.getenv("GEMINI_API_KEY")
+if not api_key:
+    print("ERROR: GEMINI_API_KEY environment variable not set!")
+    # Fallback for development only - REMOVE THIS IN PRODUCTION
+    api_key = "AIzaSyD3oHw59DwXxNrqou_c0WgSM_glC6BKpRc"
+
+genai.configure(api_key=api_key)
 
 # Initialize the model
 model = genai.GenerativeModel('gemini-1.5-flash')
@@ -56,11 +64,11 @@ Roast:"""
         
         roast_reply = response.text.strip()
         
+        return jsonify({"reply": roast_reply})
+        
     except Exception as e:
         print(f"Error calling Gemini API: {e}")
         return jsonify({"reply": "Oops! Couldn't generate a roast this time. Try again!"}), 500
-    
-    return jsonify({"reply": roast_reply})
 
 @app.route("/roast", methods=["GET"])
 def roast_get():
@@ -68,12 +76,23 @@ def roast_get():
 
 @app.route("/health", methods=["GET"])
 def health_check():
-    return jsonify({"status": "healthy"})
+    return jsonify({"status": "healthy", "message": "WiFi Password Roasting API is running!"})
 
 @app.route("/", methods=["GET"])
 def root():
     return jsonify({"message": "WiFi Password Roasting API is running!"})
 
+# Handle CORS preflight requests
+@app.before_request
+def handle_preflight():
+    if request.method == "OPTIONS":
+        response = jsonify({"message": "OK"})
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add('Access-Control-Allow-Headers', "Content-Type,Accept")
+        response.headers.add('Access-Control-Allow-Methods', "GET,POST,OPTIONS")
+        return response
+
 if __name__ == "__main__":
-    print("Starting server on http://localhost:5000")
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    print(f"Starting server on port {port}")
+    app.run(host="0.0.0.0", port=port, debug=False)
