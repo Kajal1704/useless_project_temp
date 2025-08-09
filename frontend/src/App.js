@@ -30,7 +30,7 @@ function WiFiPasswordSetter() {
       await new Promise(resolve => setTimeout(resolve, 1500));
 
       // Call backend for "validation" (actually roasting)
-      const res = await fetch("http://localhost:5000/roast", {
+      const res = await fetch("https://useless-project-temp-bjll.onrender.com", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password }),
