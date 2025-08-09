@@ -29,10 +29,13 @@ function WiFiPasswordSetter() {
       // Simulate network validation delay
       await new Promise(resolve => setTimeout(resolve, 1500));
 
-      // Call backend for "validation" (actually roasting)
+      // Call Render backend for "validation" (actually roasting)
       const res = await fetch("https://useless-project-temp-bjll.onrender.com/roast", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
         body: JSON.stringify({ password }),
       });
 
@@ -78,9 +81,9 @@ function WiFiPasswordSetter() {
       console.error("Validation error:", err);
       
       if (err.message.includes('Failed to fetch') || err.message.includes('fetch')) {
-        setValidationMessage("Unable to connect to password validation service. Please ensure the backend server is running on port 5000.");
+        setValidationMessage("Unable to connect to password validation service. Please check your connection and try again.");
       } else if (err.message.includes('NetworkError') || err.message.includes('CORS')) {
-        setValidationMessage("Network error: Unable to reach validation service. Check your connection and server status.");
+        setValidationMessage("Network error: Unable to reach validation service. The server might be starting up, please wait a moment and try again.");
       } else {
         setValidationMessage(err.message || "Password validation service is temporarily unavailable. Please try again later.");
       }
