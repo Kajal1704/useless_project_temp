@@ -1,47 +1,47 @@
 <img width="3188" height="1202" alt="frame (3)" src="https://github.com/user-attachments/assets/517ad8e9-ad22-457d-9538-a9e62d137cd7" />
 
 
-# [Project Name] 🎯
+# WifiPasswordAudit🎯
 
 
 ## Basic Details
-### Team Name: [Name]
+### Team Name: Segmentationfault
 
 
 ### Team Members
-- Team Lead: [Name] - [College]
-- Member 2: [Name] - [College]
-- Member 3: [Name] - [College]
+- Team Lead: Anjana A S- College of Engineeering Trivandrum
+- Member 2: Kajal K - College of Engineering Trivandrum
+
 
 ### Project Description
-[2-3 lines about what your project does]
+A Flask-based API that takes any WiFi password and returns a witty, inappropriate roast under 60 characters to make users question their password choices.
 
 ### The Problem (that doesn't exist)
-[What ridiculous problem are you solving?]
+People think their WiFi passwords are secure and clever—spoiler: they’re not. But who cares? Let’s roast them anyway.
 
 ### The Solution (that nobody asked for)
-[How are you solving it? Keep it fun!]
+We built an AI-powered roaster that mocks WiFi passwords with wild, witty insults—because roasting passwords is the new security audit.
 
 ## Technical Details
 ### Technologies/Components Used
 For Software:
-- [Languages used]
-- [Frameworks used]
-- [Libraries used]
-- [Tools used]
+-Python (3.13)
+-Flask
+-Flask-CORS
+-Google Generative AI Python SDK (google-generativeai)
+-React.js (Frontend, optional)
 
-For Hardware:
-- [List main components]
-- [List specifications]
-- [List tools required]
+
 
 ### Implementation
 For Software:
 # Installation
-[commands]
+pip install -r requirements.txt
+
 
 # Run
-[commands]
+python app.py
+
 
 ### Project Documentation
 For Software:
