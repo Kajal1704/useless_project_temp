@@ -4,7 +4,7 @@ import google.generativeai as genai
 import os
 
 app = Flask(__name__)
-CORS(app, resources={r"/roast": {"origins": ["http://localhost:3000", "http://localhost:3001"]}})
+CORS(app, resources={r"/roast": {"origins": ["http://localhost:3000", "http://localhost:3001", "http://localhost:3002"]}})
 
 # Configure the Gemini API
 # Set your API key as an environment variable or replace with your actual key
@@ -31,7 +31,6 @@ Jokes can be about how easy it is to hack, how weird it looks, or how it sounds 
 Never repeat the same roast, even for the same password.  
 Keep it under 150 characters.  
 Output only the roast, no explanations or extra text.
-
 Password: "{password}"
 Roast:"""
         
@@ -57,5 +56,5 @@ def health_check():
     return jsonify({"status": "healthy"})
 
 if __name__ == "__main__":
-    print("Starting server on http://localhost:5001")
-    app.run(host="0.0.0.0", port=5001, debug=True)
+    print("Starting server on http://localhost:5000")
+    app.run(host="0.0.0.0", port=5000, debug=True)

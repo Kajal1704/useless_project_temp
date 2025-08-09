@@ -14,6 +14,13 @@ function WiFiPasswordSetter() {
       return;
     }
 
+    // Check password length according to WiFi standards
+    if (password.length < 8 || password.length > 63) {
+      setValidationMessage("Password must be between 8-63 characters long");
+      setMessageType("error");
+      return;
+    }
+
     try {
       setValidating(true);
       setValidationMessage("Validating password security...");
@@ -23,50 +30,59 @@ function WiFiPasswordSetter() {
       await new Promise(resolve => setTimeout(resolve, 1500));
 
       // Call backend for "validation" (actually roasting)
-      const res = await fetch("http://localhost:5001/roast", {
+      const res = await fetch("http://localhost:5000/roast", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password }),
       });
 
       if (!res.ok) {
-        throw new Error("Validation service unavailable");
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "Validation service unavailable");
       }
 
       const data = await res.json();
-      setValidationMessage(data.reply);
-      setMessageType("warning");
+      
+      if (data.reply) {
+        setValidationMessage(data.reply);
+        setMessageType("warning");
 
-      // Text-to-speech with more natural, sarcastic voice
-      if ('speechSynthesis' in window) {
-        const synth = window.speechSynthesis;
-        const utterance = new SpeechSynthesisUtterance(data.reply);
-        
-        // Configure for more natural, sarcastic delivery
-        utterance.rate = 0.85;
-        utterance.pitch = 0.9;
-        utterance.volume = 0.8;
-        
-        // Try to find a more natural voice
-        const voices = synth.getVoices();
-        const preferredVoice = voices.find(voice => 
-          voice.name.includes('Google') || 
-          voice.name.includes('Microsoft') ||
-          voice.lang.startsWith('en')
-        );
-        if (preferredVoice) {
-          utterance.voice = preferredVoice;
+        // Text-to-speech with more natural, sarcastic voice
+        if ('speechSynthesis' in window) {
+          const synth = window.speechSynthesis;
+          const utterance = new SpeechSynthesisUtterance(data.reply);
+          
+          // Configure for more natural, sarcastic delivery
+          utterance.rate = 0.85;
+          utterance.pitch = 0.9;
+          utterance.volume = 0.8;
+          
+          // Try to find a more natural voice
+          const voices = synth.getVoices();
+          const preferredVoice = voices.find(voice => 
+            voice.name.includes('Google') || 
+            voice.name.includes('Microsoft') ||
+            voice.lang.startsWith('en')
+          );
+          if (preferredVoice) {
+            utterance.voice = preferredVoice;
+          }
+          
+          synth.speak(utterance);
         }
-        
-        synth.speak(utterance);
+      } else {
+        throw new Error("Invalid response from server");
       }
 
     } catch (err) {
-      console.error(err);
-      if (err.message.includes('Failed to fetch')) {
+      console.error("Validation error:", err);
+      
+      if (err.message.includes('Failed to fetch') || err.message.includes('fetch')) {
         setValidationMessage("Unable to connect to password validation service. Please ensure the backend server is running on port 5000.");
+      } else if (err.message.includes('NetworkError') || err.message.includes('CORS')) {
+        setValidationMessage("Network error: Unable to reach validation service. Check your connection and server status.");
       } else {
-        setValidationMessage("Password validation service is temporarily unavailable. Please try again later.");
+        setValidationMessage(err.message || "Password validation service is temporarily unavailable. Please try again later.");
       }
       setMessageType("error");
     } finally {
@@ -114,6 +130,12 @@ function WiFiPasswordSetter() {
           color: "#92400e"
         };
     }
+  };
+
+  const resetForm = () => {
+    setPassword("");
+    setValidationMessage("");
+    setMessageType("");
   };
 
   return (
@@ -225,6 +247,11 @@ function WiFiPasswordSetter() {
               }}
               onFocus={(e) => e.target.style.borderColor = "#3b82f6"}
               onBlur={(e) => e.target.style.borderColor = "#d1d5db"}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter' && password && !validating) {
+                  validatePassword();
+                }
+              }}
             />
             <button
               onClick={() => setShowPassword(!showPassword)}
@@ -281,11 +308,7 @@ function WiFiPasswordSetter() {
           justifyContent: "flex-end"
         }}>
           <button
-            onClick={() => {
-              setPassword("");
-              setValidationMessage("");
-              setMessageType("");
-            }}
+            onClick={resetForm}
             style={{
               padding: "10px 20px",
               fontSize: "14px",
@@ -297,25 +320,43 @@ function WiFiPasswordSetter() {
               cursor: "pointer",
               transition: "all 0.2s"
             }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = "#f9fafb";
+              e.target.style.borderColor = "#9ca3af";
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = "white";
+              e.target.style.borderColor = "#d1d5db";
+            }}
           >
             Cancel
           </button>
           <button
             onClick={validatePassword}
-            disabled={validating || !password}
+            disabled={validating || !password || password.length < 8 || password.length > 63}
             style={{
               padding: "10px 20px",
               fontSize: "14px",
               fontWeight: "500",
               border: "none",
               borderRadius: "8px",
-              backgroundColor: validating || !password ? "#9ca3af" : "#3b82f6",
+              backgroundColor: (validating || !password || password.length < 8 || password.length > 63) ? "#9ca3af" : "#3b82f6",
               color: "white",
-              cursor: validating || !password ? "not-allowed" : "pointer",
+              cursor: (validating || !password || password.length < 8 || password.length > 63) ? "not-allowed" : "pointer",
               transition: "all 0.2s",
               display: "flex",
               alignItems: "center",
               gap: "6px"
+            }}
+            onMouseEnter={(e) => {
+              if (!e.target.disabled) {
+                e.target.style.backgroundColor = "#2563eb";
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!e.target.disabled) {
+                e.target.style.backgroundColor = "#3b82f6";
+              }
             }}
           >
             <span style={{ marginRight: "6px" }}>🛡️</span>
